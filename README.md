@@ -66,11 +66,11 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Run Trivy vulnerability scanner in repo mode
+    - name: Run Trivy vulnerability scanner in fs mode
       uses: aquasecurity/trivy-action@add-support-for-trivy-config
       with:
         scan-type: 'fs'
-        ignore-unfixed: true
+        scan-ref: '.'
         trivy-config: ./trivy.yaml
 ```
 
@@ -81,7 +81,17 @@ exit-code: 1
 severity: CRITICAL
 ```
 
-It is possible to define all options in the `trivy.yaml` file. Specifying individual options via the action are left for backward compatibility purposes.
+It is possible to define all options in the `trivy.yaml` file. Specifying individual options via the action are left for backward compatibility purposes. Defining the following is required as they cannot be defined with the config file:
+- `scan-ref`: If using `fs, repo` scans.
+- `image-ref`: If using `image` scan.
+- `scan-type`: To define the scan type, e.g. `image`, `fs`, `repo`, etc.
+
+#### Order of prerference for options
+Trivy uses [Viper](https://github.com/spf13/viper) which has a defined precedence order for options. The order is as follows:
+- GitHub Action flag
+- Environment variable
+- Config file
+- Default
 
 ### Scanning a Tarball
 ```yaml
